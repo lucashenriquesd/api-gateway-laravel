@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Http;
 |
 */
 
-Route::get('/', function (Request $request) {
+Route::get('/', function () {
     $laravel = app();
     $version = $laravel::VERSION;
 
@@ -24,14 +24,24 @@ Route::get('/', function (Request $request) {
     ]);
 });
 
-Route::get('/ms-files-lumen', function (Request $request) {
+Route::get('/ms-files-lumen', function () {
     $response = Http::withHeaders([
         'app-token' => env('MS_FILES_LUMEN'),
     ])->get('http://ms-files-lumen8-nginx/');
 
+    $response_body_object = json_decode($response->body());
+
     return response()->json([
-        'msg' => $response->body(),
+        'msg' => $response_body_object->msg,
     ]);
+});
+
+Route::get('encryptRandom40', function () {
+    return response()->json(['msg' => Crypt::encrypt(Str::random(40))]);
+});
+
+Route::get('uuid', function () {
+    return response()->json(['msg' => Str::uuid()]);
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

@@ -16,8 +16,11 @@ use Illuminate\Support\Facades\Http;
 */
 
 Route::get('/', function (Request $request) {
+    $laravel = app();
+    $version = $laravel::VERSION;
+
     return response()->json([
-        'msg' => 'Hello World',
+        'msg' => "Laravel ($version) (Laravel Components ^8.0)",
     ]);
 });
 

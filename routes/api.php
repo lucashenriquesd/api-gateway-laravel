@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PersonalAccessTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::post('/requestToken', [UserController::class, 'requestToken']);
+
 Route::get('/users', [UserController::class, 'index']);
 
 Route::get('/users/{user:uuid}', [UserController::class, 'show']);
@@ -61,3 +64,5 @@ Route::post('/users', [UserController::class, 'store']);
 Route::put('/users/{user:uuid}', [UserController::class, 'update']);
 Route::put('/users/updateUuid{user}', [UserController::class, 'updateUuid']);
 Route::delete('/users/{uuid}', [UserController::class, 'destroy']);
+
+Route::get('/personal-access-tokens', [PersonalAccessTokenController::class, 'index']);

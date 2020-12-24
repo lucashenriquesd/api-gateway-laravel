@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class UserController extends Controller
@@ -32,6 +33,32 @@ class UserController extends Controller
         return $a;
     }
 
+    public function requestToken(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'device_name' => 'required',
+        ]);
+    
+        $user = User::where('email', $request->email)->first();
+    
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        $user->tokens()->where([
+            'tokenable_id' => $user->id,
+            'name' => $request->device_name
+        ])->delete();
+    
+        return response()->json(
+            ['message' => $user->createToken($request->device_name)->plainTextToken]
+        );
+    }
+
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -39,17 +66,19 @@ class UserController extends Controller
             'email' => 'required|max:255|string',
             'password' => 'required|max:255|string',
         ]);
-    
-        $user = new User;
-    
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->uuid = Str::uuid();
-    
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'uuid' => Str::uuid(),
+        ]);
+
+        $token = $user->createToken('login');
+
         $user->save();
-        
-        return $user;
+
+        return ['token' => $token->plainTextToken];
     }
 
     public function update(Request $request, User $user)

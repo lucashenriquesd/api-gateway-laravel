@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,14 +38,6 @@ Route::get('/ms-files-lumen', function () {
     ]);
 });
 
-Route::get('encryptRandom40', function () {
-    return response()->json(['msg' => Crypt::encrypt(Str::random(40))]);
-});
-
-Route::get('uuid', function () {
-    return response()->json(['msg' => Str::uuid()]);
-});
-
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -53,3 +47,17 @@ Route::post('/tokens/create', function (Request $request) {
 
     return ['token' => $token->plainTextToken];
 });
+
+Route::get('/users/get-column-type', [UserController::class, 'getColumnType']);
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::get('/users', [UserController::class, 'index']);
+
+Route::get('/users/{user:uuid}', [UserController::class, 'show']);
+Route::post('/users', [UserController::class, 'store']);
+Route::put('/users/{user:uuid}', [UserController::class, 'update']);
+Route::put('/users/updateUuid{user}', [UserController::class, 'updateUuid']);
+Route::delete('/users/{uuid}', [UserController::class, 'destroy']);
